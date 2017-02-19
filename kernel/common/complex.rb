@@ -61,6 +61,7 @@ class Numeric
     Math.atan2(0, self)
   end
   alias angle arg
+  alias phase arg
   
   #
   # See Complex#polar.
@@ -114,9 +115,17 @@ class Complex < Numeric
   #
   # Creates a +Complex+ number in terms of +r+ (radius) and +theta+ (angle).
   #
-  def Complex.polar(r, theta)
+  def Complex.polar(r, theta=0)
+    raise TypeError, 'not a real' unless check_real?(r) && check_real?(theta)
+
     Complex(r*Math.cos(theta), r*Math.sin(theta))
   end
+
+  def Complex.check_real?(obj)
+    obj.kind_of?(Numeric) && obj.real?
+  end
+  private_class_method :check_real?
+
 
   #
   # Creates a +Complex+ number <tt>a</tt>+<tt>b</tt><i>i</i>.
@@ -284,6 +293,8 @@ class Complex < Numeric
     Math.hypot(@real, @image)
   end
   
+  alias_method :magnitude, :abs
+  
   #
   # Square of the absolute value.
   #
@@ -360,36 +371,30 @@ class Complex < Numeric
     Complex(@real.numerator*(cd/@real.denominator),
 	    @image.numerator*(cd/@image.denominator))
   end
+  
+  def rationalize
+    raise RangeError, "non-zero imaginary part" unless @image.zero?
+    
+    Rational(@real,1)
+  end
 
   def real?
     false
   end
   
+  def rect
+    return @real, @image
+  end
+  
+  alias_method :rectangular, :rect
+  
   #
   # Standard string representation of the complex number.
   #
   def to_s
-    if @real != 0
-      if defined?(Rational) and @image.kind_of?(Rational) and @image.denominator != 1
-	if @image >= 0
-	  @real.to_s+"+("+@image.to_s+")i"
-	else
-	  @real.to_s+"-("+(-@image).to_s+")i"
-	end
-      else
-	if @image >= 0
-	  @real.to_s+"+"+@image.to_s+"i"
-	else
-	  @real.to_s+"-"+(-@image).to_s+"i"
-	end
-      end
-    else
-      if defined?(Rational) and @image.kind_of?(Rational) and @image.denominator != 1
-	"("+@image.to_s+")i"
-      else
-	@image.to_s+"i"
-      end
-    end
+    signal = "+" unless @image < 0
+    
+    "#{@real}#{signal}#{@image}i"
   end
   
   #
@@ -403,7 +408,7 @@ class Complex < Numeric
   # Returns "<tt>Complex(<i>real</i>, <i>image</i>)</tt>".
   #
   def inspect
-    sprintf("Complex(%s, %s)", @real.inspect, @image.inspect)
+    "(#{to_s})"
   end
 
   
@@ -449,4 +454,6 @@ class Integer
 
   end
 
+end
+class Complex
 end

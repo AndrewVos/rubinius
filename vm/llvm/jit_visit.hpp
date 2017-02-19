@@ -1372,7 +1372,7 @@ namespace rubinius {
         Value* obj = stack_back(0);
 
         type::KnownType kt = type::KnownType::extract(state(), obj);
-        if(kt.instance_p()) {
+        if(kt.instance_p() && !kt.singleton_instance_p()) {
           if(state()->config().jit_inline_debug) {
             context().inline_log("inlining") << "direct class of reference\n";
           }
@@ -3150,11 +3150,12 @@ use_send:
       Value* top = stack_pop();
       Value* call_args[] = {
         vm_,
+        call_frame_,
         top,
         stack_pop()
       };
 
-      Value* val = sig.call("rbx_instance_of", call_args, 3, "constant", b());
+      Value* val = sig.call("rbx_instance_of", call_args, 4, "constant", b());
       stack_push(val);
     }
 
@@ -3352,7 +3353,7 @@ use_send:
 
         if(ls_->config().jit_inline_debug) {
           context().inline_log("inline ivar read")
-            << ls_->symbol_cstr(name);
+            << ls_->symbol_debug_str(name);
         }
 
         // Figure out if we should use the table ivar lookup or
@@ -3410,7 +3411,7 @@ use_send:
 
       if(ls_->config().jit_inline_debug) {
         context().inline_log("slow ivar read")
-          << ls_->symbol_cstr(name) << "\n";
+          << ls_->symbol_debug_str(name) << "\n";
       }
 
       Signature sig(ls_, ObjType);
@@ -3440,7 +3441,7 @@ use_send:
 
         if(ls_->config().jit_inline_debug) {
           context().inline_log("inline ivar write")
-            << ls_->symbol_cstr(name);
+            << ls_->symbol_debug_str(name);
         }
 
         // slot ivars (Array#@size for example) have type checks, so use the slow
@@ -3473,7 +3474,7 @@ use_send:
 
       if(ls_->config().jit_inline_debug) {
         context().inline_log("slow ivar write")
-          << ls_->symbol_cstr(name) << "\n";
+          << ls_->symbol_debug_str(name) << "\n";
       }
 
       set_has_side_effects();
@@ -3583,11 +3584,12 @@ use_send:
 
       Value* call_args[] = {
         vm_,
+        call_frame_,
         val,
         stack_pop()
       };
 
-      Value* str = sig.call("rbx_string_append", call_args, 3, "string", b());
+      Value* str = sig.call("rbx_string_append", call_args, 4, "string", b());
       stack_push(str);
     }
 

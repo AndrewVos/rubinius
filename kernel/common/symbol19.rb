@@ -36,6 +36,10 @@ class Symbol
     end
   end
 
+  def empty?
+    to_s.empty?
+  end
+
   alias_method :intern, :to_sym
   alias_method :id2name, :to_s
 
@@ -52,4 +56,10 @@ class Symbol
   def upcase
     to_s.upcase.to_sym
   end
+
+  def succ
+    to_s.succ.to_sym
+  end
+
+  alias_method :next, :succ
 end

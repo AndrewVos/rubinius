@@ -6,7 +6,16 @@ class File
   end
 
   def size
+    raise IOError, "closed stream" if closed?
     stat.size
+  end
+
+  def self.absolute_path(obj, dir = nil)
+    if dir.nil?
+      self.path(obj)
+    else
+      self.expand_path(obj, dir)
+    end
   end
 
   alias_method :to_path, :path

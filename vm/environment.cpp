@@ -516,7 +516,7 @@ namespace rubinius {
             << ", expected "
             << as<Fixnum>(exc->get_ivar(state, state->symbol("@expected")))->to_native();
       }
-      msg << " (" << exc->klass()->name()->c_str(state) << ")";
+      msg << " (" << exc->klass()->name()->debug_str(state) << ")";
       std::cout << msg.str() << "\n";
       exc->print_locations(state);
       Assertion::raise(msg.str().c_str());
@@ -543,11 +543,12 @@ namespace rubinius {
     LLVMState::shutdown(state);
 #endif
 
+    SignalHandler::shutdown();
+
     // Hold everyone.
     state->shared.stop_the_world(state);
     shared->om->run_all_io_finalizers(state);
 
-    SignalHandler::shutdown();
     // TODO: temporarily disable to sort out finalizing Pointer objects
     // shared->om->run_all_finalizers(state);
   }

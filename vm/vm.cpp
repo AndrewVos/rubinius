@@ -265,8 +265,11 @@ namespace rubinius {
     return mod;
   }
 
-
   Symbol* VM::symbol(const char* str) {
+    return shared.symbols.lookup(str, strlen(str));
+  }
+
+  Symbol* VM::symbol(std::string str) {
     return shared.symbols.lookup(this, str);
   }
 
@@ -334,6 +337,34 @@ namespace rubinius {
 
   void VM::set_const(Module* mod, const char* name, Object* val) {
     mod->set_const(this, (char*)name, val);
+  }
+
+  Object* VM::path2class(const char* path) {
+    Module* mod = shared.globals.object.get();
+
+    char* copy = strdup(path);
+    char* cur = copy;
+
+    for(;;) {
+      char* pos = strstr(cur, "::");
+      if(pos) *pos = 0;
+
+      Object* obj = mod->get_const(this, symbol(cur));
+
+      if(pos) {
+        if(Module* m = try_as<Module>(obj)) {
+          mod = m;
+        } else {
+          free(copy);
+          return Qnil;
+        }
+      } else {
+        free(copy);
+        return obj;
+      }
+
+      cur = pos + 2;
+    }
   }
 
   void VM::print_backtrace() {

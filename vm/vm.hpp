@@ -345,6 +345,7 @@ namespace rubinius {
     Module* new_module(const char* name, Module* under = NULL);
 
     Symbol* symbol(const char* str);
+    Symbol* symbol(std::string str);
     Symbol* symbol(String* str);
 
     TypeInfo* find_type(int type);
@@ -365,6 +366,8 @@ namespace rubinius {
 
     void set_const(const char* name, Object* val);
     void set_const(Module* mod, const char* name, Object* val);
+
+    Object* path2class(const char* name);
 
 #ifdef ENABLE_LLVM
     llvm::Module* llvm_module();

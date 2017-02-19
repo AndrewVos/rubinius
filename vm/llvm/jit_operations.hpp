@@ -424,7 +424,7 @@ namespace rubinius {
           } else if(kt.class_id() == klass->class_id()) {
             if(ls_->config().jit_inline_debug) {
               context().info_log("eliding redundant guard")
-                << "class " << ls_->symbol_cstr(klass->name())
+                << "class " << ls_->symbol_debug_str(klass->name())
                 << " (" << klass->class_id() << ")\n";
             }
 
@@ -432,7 +432,11 @@ namespace rubinius {
           }
 
           check_reference_class(obj, klass->class_id(), failure);
-          return type::KnownType::instance(klass->class_id());
+          if(kind_of<SingletonClass>(klass)) {
+            return type::KnownType::singleton_instance(klass->class_id());
+          } else {
+            return type::KnownType::instance(klass->class_id());
+          }
         }
       }
     }

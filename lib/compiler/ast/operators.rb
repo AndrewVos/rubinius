@@ -367,5 +367,17 @@ module Rubinius
         :op_asgn_or
       end
     end
+
+    class OpAssignOr19 < OpAssignOr
+      def bytecode(g)
+        pos(g)
+
+        g.state.push_op_asgn
+        @left.or_bytecode(g) do
+          g.state.pop_op_asgn
+          @right.bytecode(g)
+        end
+      end
+    end
   end
 end
